@@ -7,7 +7,7 @@ const Footer = () => {
       <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between">
         {/* Brand / Logo */}
         <div className="text-lg font-semibold text-white mb-3 md:mb-0">
-          © {new Date().getFullYear()} YourProjectName
+          © {new Date().getFullYear()} TheCyberCastle
         </div>
 
         {/* Links */}
