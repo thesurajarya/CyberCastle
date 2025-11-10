@@ -27,7 +27,7 @@ const inputVariants = {
   idle: { scale: 1, boxShadow: "none" }
 };
 
-const LoginForm = ({ onClose }) => {
+const LoginForm = ({ onClose, onLoginSuccess }) => {
   const [mode, setMode] = useState("login"); // 'login' or 'signup'
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -45,12 +45,52 @@ const LoginForm = ({ onClose }) => {
       setTimeout(() => setShake("idle"), 600);
       return;
     }
+
     setError("");
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 1500)); // simulate async
-    setIsLoading(false);
-    alert(mode === "signup" ? "Signed up!" : "Logged in!");
-    onClose();
+
+    try {
+      const base = import.meta.env.VITE_API_URL || "";
+      const url =
+        mode === "signup"
+          ? `${base}/api/auth/register`
+          : `${base}/api/auth/login`;
+
+      const body =
+        mode === "signup"
+          ? { username: name, email, password }
+          : { email, password };
+
+      const resp = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const data = await resp.json();
+      if (!resp.ok) {
+        throw new Error(data.message || "Request failed");
+      }
+
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+        // Notify parent about successful login
+        if (onLoginSuccess) {
+          onLoginSuccess(data.user);
+        }
+      }
+
+      // Success UI: simple alert for now
+      alert(mode === "signup" ? "Signed up!" : "Logged in!");
+      onClose();
+    } catch (err) {
+      setError(err.message || "Request failed");
+      setShake("error");
+      setTimeout(() => setShake("idle"), 600);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
