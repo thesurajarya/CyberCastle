@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { FaBars, FaTimes } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import LoginForm from "./LoginForm";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
 
-  // Handle scroll for background change
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu on resize to avoid layout bugs
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) setMenuOpen(false);
@@ -22,18 +22,9 @@ const Header = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Animation variants for mobile menu
   const menuVariants = {
-    hidden: {
-      opacity: 0,
-      height: 0,
-      transition: { duration: 0.3, ease: "easeInOut", when: "afterChildren" },
-    },
-    visible: {
-      opacity: 1,
-      height: "auto",
-      transition: { duration: 0.3, ease: "easeInOut", when: "beforeChildren", staggerChildren: 0.1 },
-    },
+    hidden: { opacity: 0, height: 0, transition: { duration: 0.3 } },
+    visible: { opacity: 1, height: "auto", transition: { duration: 0.3 } },
   };
 
   const menuItemVariants = {
@@ -41,7 +32,14 @@ const Header = () => {
     visible: { opacity: 1, x: 0 },
   };
 
-  const navItems = ["Home", "About", "Projects", "Services", "Contact"];
+  const navItems = [
+    "Home",
+    "About",
+    "Projects",
+    "Services",
+    "Contact",
+    "Login",
+  ];
 
   return (
     <motion.header
@@ -55,7 +53,7 @@ const Header = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 py-3 md:py-4 flex items-center justify-between">
-        {/* 🌐 Logo */}
+        {/* Logo */}
         <motion.a
           href="#home"
           whileHover={{ scale: 1.05 }}
@@ -67,26 +65,35 @@ const Header = () => {
           </span>
         </motion.a>
 
-        {/* 💻 Desktop Menu */}
+        {/* Desktop Menu */}
         <nav className="hidden md:flex space-x-8 lg:space-x-12 text-gray-300 font-medium">
-          {navItems.map((item) => (
-            <motion.a
-              key={item}
-              href={`#${item.toLowerCase()}`}
-              className="relative group py-2"
-              whileHover={{ scale: 1.05, color: "#fff" }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              <span className="relative z-10 transition-colors duration-300 group-hover:text-cyan-300 group-hover:drop-shadow-[0_0_8px_rgba(103,232,249,0.8)]">
+          {navItems.map((item) =>
+            item === "Login" ? (
+              <motion.button
+                key={item}
+                onClick={() => setShowLogin(true)}
+                className="relative group py-2 bg-transparent border-none text-gray-300 cursor-pointer hover:text-cyan-400 transition"
+                whileHover={{ scale: 1.05, color: "#fff" }}
+              >
                 {item}
-              </span>
-              {/* Animated underline */}
-              <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-gradient-to-r from-cyan-500 to-purple-500 transition-all duration-300 group-hover:w-full shadow-[0_0_10px_rgba(168,85,247,0.6)]"></span>
-            </motion.a>
-          ))}
+              </motion.button>
+            ) : (
+              <motion.a
+                key={item}
+                href={`#${item.toLowerCase()}`}
+                className="relative group py-2"
+                whileHover={{ scale: 1.05, color: "#fff" }}
+              >
+                <span className="relative z-10 transition-colors duration-300 group-hover:text-cyan-300 group-hover:drop-shadow-[0_0_8px_rgba(103,232,249,0.8)]">
+                  {item}
+                </span>
+                <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-gradient-to-r from-cyan-500 to-purple-500 transition-all duration-300 group-hover:w-full shadow-[0_0_10px_rgba(168,85,247,0.6)]"></span>
+              </motion.a>
+            )
+          )}
         </nav>
 
-        {/* 📱 Mobile Toggle Button */}
+        {/* Mobile Toggle Button */}
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => setMenuOpen(!menuOpen)}
@@ -118,7 +125,7 @@ const Header = () => {
         </motion.button>
       </div>
 
-      {/* 📲 Mobile Dropdown */}
+      {/* Mobile Dropdown */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
@@ -129,18 +136,41 @@ const Header = () => {
             className="md:hidden overflow-hidden bg-[#0b0f2a]/95 backdrop-blur-xl border-t border-indigo-500/30"
           >
             <nav className="flex flex-col items-center space-y-8 py-10">
-              {navItems.map((item) => (
-                <motion.a
-                  key={item}
-                  href={`#${item.toLowerCase()}`}
-                  variants={menuItemVariants}
-                  onClick={() => setMenuOpen(false)}
-                  className="text-2xl text-gray-300 font-medium tracking-wider hover:text-cyan-400 transition-colors duration-300"
-                >
-                  {item}
-                </motion.a>
-              ))}
+              {navItems.map((item) =>
+                item === "Login" ? (
+                  <motion.button
+                    key={item}
+                    onClick={() => { setMenuOpen(false); setShowLogin(true); }}
+                    className="text-2xl text-gray-300 font-medium tracking-wider hover:text-cyan-400 transition-colors duration-300"
+                  >
+                    {item}
+                  </motion.button>
+                ) : (
+                  <motion.a
+                    key={item}
+                    href={`#${item.toLowerCase()}`}
+                    variants={menuItemVariants}
+                    onClick={() => setMenuOpen(false)}
+                    className="text-2xl text-gray-300 font-medium tracking-wider hover:text-cyan-400 transition-colors duration-300"
+                  >
+                    {item}
+                  </motion.a>
+                )
+              )}
             </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Login Modal */}
+      <AnimatePresence>
+        {showLogin && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <LoginForm onClose={() => setShowLogin(false)} />
           </motion.div>
         )}
       </AnimatePresence>
