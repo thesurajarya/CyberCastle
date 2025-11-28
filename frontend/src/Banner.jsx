@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { FaGithub, FaLinkedin, FaTwitter } from "react-icons/fa";
+import { Link } from "react-router-dom"; // NEW: Import Link for routing
 import TopicsModal from "./TopicsModal";
 
 const Banner = () => {
@@ -24,14 +25,31 @@ const Banner = () => {
       >
         A modern landing page with smooth animations, interactive UI, and secure login. Explore our services or sign in to continue.
       </motion.p>
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        className="px-8 py-3 bg-cyan-400 text-white font-semibold rounded-full shadow-md hover:bg-purple-400 transition-colors focus:outline-none"
-        onClick={() => setShowTopics(true)}
-      >
-        Get Started
-      </motion.button>
+
+      {/* Button Group */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        {/* Original "Get Started" button */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="px-8 py-3 bg-cyan-400 text-white font-semibold rounded-full shadow-md hover:bg-purple-400 transition-colors focus:outline-none"
+          onClick={() => setShowTopics(true)}
+        >
+          Get Started
+        </motion.button>
+
+        {/* NEW: Learn button - navigates to topic page */}
+        <Link to="/topic/react-basics">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-8 py-3 bg-indigo-500 text-white font-semibold rounded-full shadow-md hover:bg-indigo-600 transition-colors focus:outline-none"
+          >
+            📚 Start Learning
+          </motion.button>
+        </Link>
+      </div>
+
       <motion.div
         className="flex space-x-6 mt-8"
         initial={{ opacity: 0 }}

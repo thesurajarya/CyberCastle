@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaBars, FaTimes } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
 import LoginForm from "./LoginForm";
 import ProfileDropdown from "./ProfileDropdown";
 
@@ -10,7 +11,6 @@ const Header = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [user, setUser] = useState(null);
 
-  // Load user from localStorage on mount
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -43,11 +43,12 @@ const Header = () => {
   };
 
   const navItems = [
-    "Home",
-    "About",
-    "Projects",
-    "Services",
-    "Contact",
+    { label: "Home", href: "#home" },
+    { label: "About", href: "#about" },
+    { label: "Projects", href: "#projects" },
+    { label: "Services", href: "#services" },
+    { label: "Contact", href: "#contact" },
+    { label: "Learn", href: "/topic/react-basics" }, // NEW: Learning feature
   ];
 
   return (
@@ -77,17 +78,35 @@ const Header = () => {
         {/* Desktop Menu */}
         <nav className="hidden md:flex space-x-8 lg:space-x-12 text-gray-300 font-medium items-center">
           {navItems.map((item) => (
-            <motion.a
-              key={item}
-              href={`#${item.toLowerCase()}`}
-              className="relative group py-2"
-              whileHover={{ scale: 1.05, color: "#fff" }}
-            >
-              <span className="relative z-10 transition-colors duration-300 group-hover:text-cyan-300 group-hover:drop-shadow-[0_0_8px_rgba(103,232,249,0.8)]">
-                {item}
-              </span>
-              <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-gradient-to-r from-cyan-500 to-purple-500 transition-all duration-300 group-hover:w-full shadow-[0_0_10px_rgba(168,85,247,0.6)]"></span>
-            </motion.a>
+            <motion.div key={item.label}>
+              {item.label === "Learn" ? (
+                // NEW: Learn link uses React Router Link
+                <Link
+                  to={item.href}
+                  className="relative group py-2"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <motion.span
+                    className="relative z-10 transition-colors duration-300 group-hover:text-cyan-300 group-hover:drop-shadow-[0_0_8px_rgba(103,232,249,0.8)]"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    {item.label}
+                  </motion.span>
+                  <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-gradient-to-r from-cyan-500 to-purple-500 transition-all duration-300 group-hover:w-full shadow-[0_0_10px_rgba(168,85,247,0.6)]"></span>
+                </Link>
+              ) : (
+                <motion.a
+                  href={item.href}
+                  className="relative group py-2"
+                  whileHover={{ scale: 1.05, color: "#fff" }}
+                >
+                  <span className="relative z-10 transition-colors duration-300 group-hover:text-cyan-300 group-hover:drop-shadow-[0_0_8px_rgba(103,232,249,0.8)]">
+                    {item.label}
+                  </span>
+                  <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-gradient-to-r from-cyan-500 to-purple-500 transition-all duration-300 group-hover:w-full shadow-[0_0_10px_rgba(168,85,247,0.6)]"></span>
+                </motion.a>
+              )}
+            </motion.div>
           ))}
 
           {/* Profile Dropdown or Login Button */}
@@ -148,15 +167,25 @@ const Header = () => {
           >
             <nav className="flex flex-col items-center space-y-8 py-10">
               {navItems.map((item) => (
-                <motion.a
-                  key={item}
-                  href={`#${item.toLowerCase()}`}
-                  variants={menuItemVariants}
-                  onClick={() => setMenuOpen(false)}
-                  className="text-2xl text-gray-300 font-medium tracking-wider hover:text-cyan-400 transition-colors duration-300"
-                >
-                  {item}
-                </motion.a>
+                <motion.div key={item.label} variants={menuItemVariants}>
+                  {item.label === "Learn" ? (
+                    <Link
+                      to={item.href}
+                      onClick={() => setMenuOpen(false)}
+                      className="text-2xl text-gray-300 font-medium tracking-wider hover:text-cyan-400 transition-colors duration-300"
+                    >
+                      {item.label}
+                    </Link>
+                  ) : (
+                    <a
+                      href={item.href}
+                      onClick={() => setMenuOpen(false)}
+                      className="text-2xl text-gray-300 font-medium tracking-wider hover:text-cyan-400 transition-colors duration-300"
+                    >
+                      {item.label}
+                    </a>
+                  )}
+                </motion.div>
               ))}
 
               {/* Mobile Profile or Login */}

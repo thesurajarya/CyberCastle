@@ -3,22 +3,14 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 3D flip utilities for flashcards */
+/* 3D Utility classes for Flashcards */
 @layer utilities {
-  .perspective-1000 {
-    perspective: 1000px;
-  }
-
-  .transform-style-preserve-3d {
-    transform-style: preserve-3d;
-  }
-
-  .rotate-y-180 {
-    transform: rotateY(180deg);
-  }
+  .perspective-1000 { perspective: 1000px; }
+  .transform-style-preserve-3d { transform-style: preserve-3d; }
+  .rotate-y-180 { transform: rotateY(180deg); }
 }
 
-/* Body styling from your theme */
+/* Your existing styles below */
 body {
   @apply bg-gradient-to-b from-[#0b0f2a] via-[#0c112f] to-[#050819] text-gray-100 min-h-screen;
   font-family: 'Poppins', sans-serif;
