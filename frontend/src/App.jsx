@@ -21,7 +21,6 @@ function App() {
             <Banner />
             <AwarenessSection />
             <WhyLearnSection />
-            <FlashcardTopics />
           </>
         } />
         

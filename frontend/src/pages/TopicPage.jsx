@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import QuizPanel from "../components/quiz/QuizPanel";
+import Flashcard from "../components/Flashcards/Flashcard";
 
 function TopicPage() {
   const { topicId } = useParams();
@@ -12,15 +13,12 @@ function TopicPage() {
   // Load topic content
   useEffect(() => {
     fetch(`http://localhost:5001/api/topics/${topicId}`)
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         setTopicContent(data);
-        if (data.subtopics?.length > 0) {
-          setSelectedSubtopic(data.subtopics[0]);
-        }
         setLoading(false);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         setLoading(false);
       });
@@ -64,30 +62,36 @@ function TopicPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 py-20">
-      <div className="max-w-6xl mx-auto px-4 space-y-12">
-        
-        {/* Header Section */}
+      <div className="max-w-6xl mx-auto px-4 space-y-14">
+
+        {/* HEADER */}
         <div className="space-y-4">
           <div className="inline-flex items-center px-4 py-2 bg-cyan-500/10 border border-cyan-500/30 rounded-full">
-            <span className="text-sm font-semibold text-cyan-400">📚 Learning Path</span>
+            <span className="text-sm font-semibold text-cyan-400">
+              📚 Learning Path
+            </span>
           </div>
-          
+
           <h1 className="text-6xl md:text-7xl font-bold text-white leading-tight">
             {topicContent.title}
           </h1>
-          
+
           <p className="text-xl text-gray-300 max-w-3xl leading-relaxed">
             {topicContent.description}
           </p>
 
-          <div className="flex gap-4 pt-4">
+          <div className="flex gap-6 pt-4">
             <div className="flex items-center gap-2">
               <span className="text-2xl">📖</span>
-              <span className="text-gray-300">{topicContent.subtopics?.length || 0} Chapters</span>
+              <span className="text-gray-300">
+                {topicContent.subtopics?.length || 0} Subtopics
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-2xl">🎯</span>
-              <span className="text-gray-300">{topicContent.keyPoints?.length || 0} Key Points</span>
+              <span className="text-gray-300">
+                {topicContent.keyPoints?.length || 0} Key Points
+              </span>
             </div>
           </div>
         </div>
@@ -131,6 +135,7 @@ function TopicPage() {
               </div>
             </div>
           </div>
+        )}
 
           {/* Main Content */}
           <div className="lg:col-span-3 space-y-8">
@@ -227,9 +232,14 @@ function TopicPage() {
         {/* Quiz Section */}
         <div className="border-t border-white/10 pt-12">
           <div className="space-y-4 mb-8">
-            <h2 className="text-4xl font-bold text-white">Test Your Knowledge</h2>
-            <p className="text-gray-300">Take our adaptive quiz to check your understanding</p>
+            <h2 className="text-4xl font-bold text-white">
+              Test Your Knowledge
+            </h2>
+            <p className="text-gray-300">
+              Take our adaptive quiz to check your understanding
+            </p>
           </div>
+
           <QuizPanel topicId={topicId} />
         </div>
 
