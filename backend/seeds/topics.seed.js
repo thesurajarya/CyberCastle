@@ -1,5 +1,12 @@
+// Load environment variables from .env
+require('dotenv').config();
+
 const mongoose = require('mongoose');
 const Topic = require('../models/topic.model');
+
+// Read URI once from env
+const MONGODB_URI = process.env.MONGODB_URI;
+console.log('MONGODB_URI in seed:', MONGODB_URI);
 
 const topicsData = [
   {
@@ -134,13 +141,6 @@ const topicsData = [
         content: `
           <h3>SQL Injection</h3>
           <p>SQL injection is a code injection technique where attackers insert malicious SQL statements into input fields.</p>
-          
-          <h4>Example:</h4>
-          <pre>
-            username: admin' --
-            password: anything
-            Query becomes: SELECT * FROM users WHERE username='admin'--' AND password='anything'
-          </pre>
           
           <h4>Prevention:</h4>
           <ul>
@@ -406,13 +406,6 @@ const topicsData = [
           <h3>Ransomware</h3>
           <p>Ransomware encrypts user data and demands payment for decryption keys.</p>
           
-          <h4>Famous Examples:</h4>
-          <ul>
-            <li>WannaCry - Affected 200,000+ systems</li>
-            <li>NotPetya - Destructive Ukraine attack</li>
-            <li>Locky - Encrypted documents</li>
-          </ul>
-          
           <h4>Protection:</h4>
           <ul>
             <li>Regular backups</li>
@@ -624,14 +617,12 @@ const topicsData = [
 
 async function seedTopics() {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
+    await mongoose.connect(MONGODB_URI);
     console.log('Connected to MongoDB');
 
-    // Clear existing topics
     await Topic.deleteMany({});
     console.log('Cleared existing topics');
 
-    // Insert new topics
     await Topic.insertMany(topicsData);
     console.log(`Successfully seeded ${topicsData.length} topics`);
 
