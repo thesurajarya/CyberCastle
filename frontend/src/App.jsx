@@ -4,10 +4,10 @@ import Header from "./Header";
 import Banner from "./Banner";
 import AwarenessSection from "./components/AwarenessSection";
 import WhyLearnSection from "./components/WhyLearnSection";
-
 import FlashcardTopics from './components/FlashcardTopics';
 import TopicPage from "./pages/TopicPage";
-import TopicsListPage from "./pages/TopicsListPage"; // NEW: Add this import
+import TopicsListPage from "./pages/TopicsListPage";
+import Dashboard from "./pages/Dashboard";
 import Footer from "./Footer";
 
 function App() {
@@ -21,7 +21,6 @@ function App() {
             <Banner />
             <AwarenessSection />
             <WhyLearnSection />
-
             <FlashcardTopics />
           </>
         } />
