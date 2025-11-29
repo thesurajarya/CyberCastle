@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { FaGithub, FaLinkedin, FaTwitter } from "react-icons/fa";
+import {
+  FaGithub,
+  FaLinkedin,
+  FaTwitter,
+  FaShieldAlt,
+  FaLock,
+} from "react-icons/fa";
 import { Link } from "react-router-dom";
 import TopicsModal from "./TopicsModal";
 
@@ -9,7 +15,6 @@ const Banner = () => {
 
   return (
     <section className="relative w-full mt-20 flex flex-col items-center justify-center py-24 overflow-hidden bg-[#050816]">
-
       {/* Cyber Grid Background */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,#ffffff12_1px,transparent_0)] bg-[size:36px_36px] opacity-20"></div>
 
@@ -19,7 +24,6 @@ const Banner = () => {
 
       {/* MAIN CONTENT */}
       <div className="relative z-10 max-w-5xl text-center px-6">
-
         {/* Title */}
         <motion.h1
           initial={{ opacity: 0, y: 40 }}
@@ -40,8 +44,8 @@ const Banner = () => {
           transition={{ delay: 0.3, duration: 0.6 }}
           className="text-lg sm:text-xl text-gray-300 mb-10 max-w-3xl mx-auto"
         >
-          Learn cybersecurity, understand real-world threats, test your knowledge with
-          interactive quizzes, and protect yourself in the digital world.
+          Learn cybersecurity, understand real-world threats, test your knowledge
+          with interactive quizzes, and protect yourself in the digital world.
         </motion.p>
 
         {/* Feature Badges */}
@@ -54,26 +58,28 @@ const Banner = () => {
           <span className="flex items-center gap-2 px-4 py-2 bg-white/10 text-cyan-300 rounded-full border border-white/20">
             <FaShieldAlt /> Awareness
           </span>
+
           <span className="flex items-center gap-2 px-4 py-2 bg-white/10 text-purple-300 rounded-full border border-white/20">
             <FaLock /> Secure Learning
           </span>
+
           <span className="px-4 py-2 bg-white/10 text-gray-300 rounded-full border border-white/20">
             AI Quizzes
           </span>
         </motion.div>
 
-        {/* UPDATED: Start Learning button - navigates to topics list */}
-        <Link to="/topics">
-          <motion.button
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-10 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-semibold rounded-full shadow-lg hover:shadow-cyan-500/40 transition-all"
-            onClick={() => setShowTopics(true)}
-          >
-            🚀 Get Started
-          </motion.button>
+        {/* Buttons */}
+        <div className="flex gap-4 justify-center">
+          <Link to="/topics">
+            <motion.button
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-10 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-semibold rounded-full shadow-lg hover:shadow-cyan-500/40 transition-all"
+            >
+              🚀 Get Started
+            </motion.button>
+          </Link>
 
-          {/* Start Learning */}
           <Link to="/topics">
             <motion.button
               whileHover={{ scale: 1.08 }}
@@ -83,7 +89,6 @@ const Banner = () => {
               📚 Start Learning
             </motion.button>
           </Link>
-
         </div>
 
         {/* STATS SECTION */}
@@ -97,10 +102,12 @@ const Banner = () => {
             <h3 className="text-3xl font-bold text-cyan-400">50+</h3>
             <p className="text-gray-400 text-sm mt-1">Cyber Topics</p>
           </div>
+
           <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
             <h3 className="text-3xl font-bold text-purple-400">100+</h3>
             <p className="text-gray-400 text-sm mt-1">Quizzes</p>
           </div>
+
           <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
             <h3 className="text-3xl font-bold text-indigo-400">24/7</h3>
             <p className="text-gray-400 text-sm mt-1">Learning Access</p>
@@ -117,9 +124,11 @@ const Banner = () => {
           <a href="https://github.com/" target="_blank" rel="noopener noreferrer">
             <FaGithub className="text-white text-2xl hover:text-cyan-300 transition-all" />
           </a>
+
           <a href="https://linkedin.com/" target="_blank" rel="noopener noreferrer">
             <FaLinkedin className="text-white text-2xl hover:text-indigo-300 transition-all" />
           </a>
+
           <a href="https://twitter.com/" target="_blank" rel="noopener noreferrer">
             <FaTwitter className="text-white text-2xl hover:text-purple-300 transition-all" />
           </a>
@@ -128,7 +137,6 @@ const Banner = () => {
 
       {/* Topics Modal */}
       <TopicsModal isOpen={showTopics} onClose={() => setShowTopics(false)} />
-
     </section>
   );
 };

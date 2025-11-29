@@ -24,9 +24,60 @@ const Topic = require('./models/topic.model'); // NEW
 const questionsStore = {};
 const userStats = {};
 
-const HF_TOKEN = process.env.HUGGINGFACE_TOKEN;
+// Pre-built questions for each topic
+const topicQuestions = {
+  'network-attacks': [
+    { id: 'q1', text: 'What does DDoS stand for?', options: ['Domain Denial System', 'Distributed Denial of Service', 'Data Delivery Service', 'Digital Defense System'], correctIndex: 1, subtopicKey: 'ddos' },
+    { id: 'q2', text: 'In a MITM attack, what happens?', options: ['Data is encrypted', 'Attacker intercepts communication', 'Connection is blocked', 'Firewall activated'], correctIndex: 1, subtopicKey: 'mitm' },
+    { id: 'q3', text: 'What is DNS spoofing?', options: ['Email verification', 'Manipulating DNS responses', 'Password hashing', 'Token generation'], correctIndex: 1, subtopicKey: 'dns' },
+    { id: 'q4', text: 'Which prevents network attacks?', options: ['Ignoring updates', 'Encryption and authentication', 'Disabling firewalls', 'Public networks'], correctIndex: 1, subtopicKey: 'prevention' },
+    { id: 'q5', text: 'What is ARP spoofing?', options: ['Email spoofing', 'Manipulating ARP tables', 'Web spoofing', 'Phone spoofing'], correctIndex: 1, subtopicKey: 'arp' }
+  ],
+  'web-application-attacks': [
+    { id: 'q1', text: 'What is SQL Injection?', options: ['Injecting CSS', 'Inserting malicious SQL', 'Injecting JavaScript', 'Injecting HTML'], correctIndex: 1, subtopicKey: 'sql' },
+    { id: 'q2', text: 'XSS stands for?', options: ['XML Secure Shell', 'Cross-Site Scripting', 'Extra Security System', 'X Protocol'], correctIndex: 1, subtopicKey: 'xss' },
+    { id: 'q3', text: 'How does CSRF work?', options: ['Steals cookies', 'Tricks authenticated users', 'Breaks encryption', 'Deletes data'], correctIndex: 1, subtopicKey: 'csrf' },
+    { id: 'q4', text: 'Prevents SQL injection?', options: ['Strong passwords', 'Prepared statements', 'Firewalls', 'Encryption'], correctIndex: 1, subtopicKey: 'sql' },
+    { id: 'q5', text: 'Prevents XSS?', options: ['Firewalls', 'Input validation', 'VPNs', 'Proxies'], correctIndex: 1, subtopicKey: 'xss' }
+  ],
+  'authentication-attacks': [
+    { id: 'q1', text: 'What is brute force?', options: ['Physical attack', 'Trying all passwords', 'Social engineering', 'Malware'], correctIndex: 1, subtopicKey: 'brute' },
+    { id: 'q2', text: 'MFA stands for?', options: ['Maximum File Access', 'Multi-Factor Authentication', 'Mobile First', 'Modified File'], correctIndex: 1, subtopicKey: 'mfa' },
+    { id: 'q3', text: 'Credential stuffing is?', options: ['Creating passwords', 'Using leaked credentials', 'Forgetting passwords', 'Sharing passwords'], correctIndex: 1, subtopicKey: 'cred' },
+    { id: 'q4', text: 'Prevents brute force?', options: ['Open passwords', 'Account lockout', 'Simple passwords', 'No auth'], correctIndex: 1, subtopicKey: 'brute' },
+    { id: 'q5', text: 'What is phishing?', options: ['Real fishing', 'Login forms', 'Deceptive emails', 'Network fishing'], correctIndex: 1, subtopicKey: 'phish' }
+  ],
+  'social-engineering': [
+    { id: 'q1', text: 'Social engineering exploits?', options: ['Hardware', 'Human psychology', 'Networks', 'Firewalls'], correctIndex: 1, subtopicKey: 'se' },
+    { id: 'q2', text: 'Pretexting is?', options: ['Real scenario', 'Fabricated scenario', 'Real email', 'Fake password'], correctIndex: 1, subtopicKey: 'pretex' },
+    { id: 'q3', text: 'Baiting involves?', options: ['Real offers', 'Infected USB drives', 'Real gifts', 'Real money'], correctIndex: 1, subtopicKey: 'bait' },
+    { id: 'q4', text: 'Best defense against SE?', options: ['Firewall', 'User training', 'VPN', 'Antivirus'], correctIndex: 1, subtopicKey: 'defense' },
+    { id: 'q5', text: 'Phishing red flag?', options: ['Valid sender', 'Professional format', 'Urgent language', 'Clear identity'], correctIndex: 1, subtopicKey: 'phish' }
+  ],
+  'malware': [
+    { id: 'q1', text: 'Viruses need?', options: ['Internet', 'Host file', 'Network', 'Server'], correctIndex: 1, subtopicKey: 'virus' },
+    { id: 'q2', text: 'Worms spread?', options: ['Slowly', 'Autonomously', 'Manually', 'By email only'], correctIndex: 1, subtopicKey: 'worm' },
+    { id: 'q3', text: 'Ransomware does?', options: ['Steals data', 'Encrypts data for payment', 'Deletes files', 'Monitors activity'], correctIndex: 1, subtopicKey: 'ransom' },
+    { id: 'q4', text: 'Trojans disguise as?', options: ['Viruses', 'Legitimate software', 'Emails', 'Links'], correctIndex: 1, subtopicKey: 'trojan' },
+    { id: 'q5', text: 'Protects against malware?', options: ['Open networks', 'Antivirus and backups', 'Disabling updates', 'Public access'], correctIndex: 1, subtopicKey: 'protect' }
+  ],
+  'wireless-attacks': [
+    { id: 'q1', text: 'Wi-Fi broadcast is?', options: ['Encrypted', 'Open signal', 'Secure', 'Private'], correctIndex: 1, subtopicKey: 'wifi' },
+    { id: 'q2', text: 'WPA3 is?', options: ['Old standard', 'Latest standard', 'Outdated', 'Cracked'], correctIndex: 1, subtopicKey: 'wpa' },
+    { id: 'q3', text: 'Evil twin is?', options: ['Real network', 'Fake Wi-Fi network', 'Secure network', 'Private network'], correctIndex: 1, subtopicKey: 'evil' },
+    { id: 'q4', text: 'Protects wireless?', options: ['No encryption', 'VPN and encryption', 'Public Wi-Fi', 'No password'], correctIndex: 1, subtopicKey: 'protect' },
+    { id: 'q5', text: 'Packet sniffing prevents?', options: ['Firewall only', 'HTTPS and VPN', 'No solution', 'Hidden SSID only'], correctIndex: 1, subtopicKey: 'sniff' }
+  ],
+  'basic-security-issues': [
+    { id: 'q1', text: 'Strong password needs?', options: ['8 chars', '12+ chars mixed', '6 digits', 'Only letters'], correctIndex: 1, subtopicKey: 'pass' },
+    { id: 'q2', text: 'Default credentials are?', options: ['Secure', 'Critical vulnerability', 'Optional', 'Random'], correctIndex: 1, subtopicKey: 'default' },
+    { id: 'q3', text: 'Unpatched systems are?', options: ['Secure', 'Vulnerable to exploits', 'Updated', 'Protected'], correctIndex: 1, subtopicKey: 'patch' },
+    { id: 'q4', text: 'Backups protect against?', options: ['Viruses only', 'Data loss', 'Firewalls', 'Passwords'], correctIndex: 1, subtopicKey: 'backup' },
+    { id: 'q5', text: 'Regular updates prevent?', options: ['All attacks', 'Known vulnerabilities', 'Social engineering', 'Physical theft'], correctIndex: 1, subtopicKey: 'update' }
+  ]
+};
 
-// NEW: Get all topics
+// Get all topics (for listing)
 app.get('/api/topics', async (req, res) => {
   try {
     const topics = await Topic.find({}, { html: 0 });
@@ -37,7 +88,7 @@ app.get('/api/topics', async (req, res) => {
   }
 });
 
-// UPDATED: Get single topic from MongoDB
+// Get single topic
 app.get('/api/topics/:id', async (req, res) => {
   try {
     const topic = await Topic.findOne({ id: req.params.id });
@@ -49,70 +100,33 @@ app.get('/api/topics/:id', async (req, res) => {
   }
 });
 
-// Generate questions using Hugging Face AI
-async function generateQuestionsFromText(topicContent, weakAreas = []) {
-  if (!HF_TOKEN) {
-    console.error('Missing HUGGINGFACE_TOKEN in .env');
-    throw new Error('AI service not configured');
-  }
-
-  const prompt = `Generate 5 multiple choice questions from this text. Return ONLY JSON:
-{"questions":[{"id":"q1","text":"...","options":["A","B","C","D"],"correctIndex":0,"subtopicKey":"components"}]}
-
-Content: ${topicContent}
-
-Weak areas: ${weakAreas.join(', ') || 'none'}`;
-
-  try {
-    const response = await fetch('https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${HF_TOKEN}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        inputs: prompt,
-        parameters: { max_new_tokens: 400, temperature: 0.7 }
-      })
-    });
-
-    const data = await response.json();
-    const text = Array.isArray(data) && data[0]?.generated_text ? data[0].generated_text : JSON.stringify(data);
-    
-    const start = text.indexOf('{');
-    const end = text.lastIndexOf('}');
-    if (start === -1 || end === -1) throw new Error('Invalid AI response format');
-    
-    const jsonString = text.slice(start, end + 1);
-    const parsed = JSON.parse(jsonString);
-    return parsed.questions || [];
-  } catch (error) {
-    console.error('AI generation error:', error);
-    throw error;
-  }
-}
-
-// Generate quiz for topic
+// Generate quiz - uses pre-built questions (no AI)
 app.post('/api/quiz/generate', async (req, res) => {
   const { topicId, userId = 'anonymous' } = req.body;
   
   try {
-    const topic = await Topic.findOne({ id: topicId }); // UPDATED: From MongoDB
+    console.log('🔍 Quiz Generate Called');
+    console.log('Topic ID:', topicId);
+    
+    const topic = await Topic.findOne({ id: topicId });
     if (!topic) return res.status(404).json({ error: 'Topic not found' });
 
-    const statsKey = `${userId}_${topicId}`;
-    const stats = userStats[statsKey] || { weakAreas: [] };
+    // Get pre-built questions for this topic
+    const questions = topicQuestions[topicId] || topicQuestions['network-attacks'];
     
-    const questions = await generateQuestionsFromText(topic.html, stats.weakAreas);
+    if (!questions || questions.length === 0) {
+      return res.status(400).json({ error: 'No questions available for this topic' });
+    }
+
+    // Shuffle questions order
+    const shuffled = [...questions].sort(() => Math.random() - 0.5);
     
-    questions.forEach((q, i) => {
-      if (!q.id) q.id = `q_${Date.now()}_${i}`;
-    });
+    questionsStore[topicId] = shuffled;
+    console.log(`✅ Generated ${shuffled.length} questions for ${topicId}`);
     
-    questionsStore[topicId] = questions;
-    res.json({ questions });
+    res.json({ questions: shuffled });
   } catch (error) {
-    console.error(error);
+    console.error('❌ Quiz error:', error);
     res.status(500).json({ error: 'Failed to generate quiz' });
   }
 });
@@ -155,6 +169,7 @@ app.post('/api/quiz/submit', (req, res) => {
     suggestions: weakAreas.map(w => `Review: ${w}`)
   });
 });
+
 // === AI QUIZ SYSTEM END ===
 
 // Error handling middleware

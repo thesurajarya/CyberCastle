@@ -13,20 +13,17 @@ const Header = () => {
 
   const navigate = useNavigate();
 
-  // Load user from localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) setUser(JSON.parse(storedUser));
   }, []);
 
-  // Scroll transparent → glass navbar
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu when window is resized to desktop
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) setMenuOpen(false);
@@ -35,7 +32,6 @@ const Header = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Framer motion menu animations
   const menuVariants = {
     hidden: { opacity: 0, height: 0, transition: { duration: 0.3 } },
     visible: { opacity: 1, height: "auto", transition: { duration: 0.3 } },
@@ -46,15 +42,11 @@ const Header = () => {
     visible: { opacity: 1, x: 0 },
   };
 
-const navItems = [
-  { label: "Home", href: "#home" },
-  { label: "About", href: "#about" },
-  { label: "Projects", href: "#projects" },
-  { label: "Services", href: "#services" },
-  { label: "Contact", href: "#contact" },
-  { label: "Learn", href: "/topics" }, // ← Route to list page
-];
-
+  const navItems = [
+    { label: "Home", href: "/" },
+    { label: "Dashboard", href: "/dashboard" },
+    { label: "Learn", href: "/topics" },
+  ];
 
   return (
     <motion.header
@@ -103,12 +95,10 @@ const navItems = [
             </motion.div>
           ))}
 
-          {/* LOGIN & GET STARTED */}
           {user ? (
             <ProfileDropdown user={user} onLogout={() => setUser(null)} />
           ) : (
             <div className="flex items-center gap-4">
-              {/* Login */}
               <motion.button
                 onClick={() => setShowLogin(true)}
                 className="text-gray-300 hover:text-cyan-400 transition"
@@ -117,7 +107,6 @@ const navItems = [
                 Login
               </motion.button>
 
-              {/* GET STARTED - SIGNUP */}
               <motion.button
                 onClick={() => navigate("/signup")}
                 whileHover={{ scale: 1.05 }}
@@ -172,7 +161,6 @@ const navItems = [
             className="md:hidden overflow-hidden bg-[#0b0f2a]/95 backdrop-blur-xl border-t border-indigo-500/30"
           >
             <nav className="flex flex-col items-center space-y-8 py-10">
-              
               {navItems.map((item) => (
                 <motion.div key={item.label} variants={menuItemVariants}>
                   <Link
@@ -185,7 +173,6 @@ const navItems = [
                 </motion.div>
               ))}
 
-              {/* LOGIN + GET STARTED (MOBILE) */}
               {user ? (
                 <motion.div variants={menuItemVariants} className="w-full px-8">
                   <ProfileDropdown
@@ -198,7 +185,6 @@ const navItems = [
                 </motion.div>
               ) : (
                 <>
-                  {/* Login */}
                   <motion.button
                     onClick={() => {
                       setMenuOpen(false);
@@ -210,7 +196,6 @@ const navItems = [
                     Login
                   </motion.button>
 
-                  {/* Get Started */}
                   <motion.button
                     onClick={() => navigate("/signup")}
                     variants={menuItemVariants}

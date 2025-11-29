@@ -8,30 +8,40 @@ function QuizPanel({ topicId = "network-attacks", userId = "anonymous" }) {
   const [finished, setFinished] = useState(false);
   const [result, setResult] = useState(null);
 
-  const loadQuiz = async () => {
-    setLoading(true);
-    setFinished(false);
-    setResult(null);
-    setAnswers({});
-    setCurrent(0);
-    try {
-      const res = await fetch("http://localhost:5001/api/quiz/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topicId, userId })
-      });
-      const data = await res.json();
-      if (data.questions) {
-        setQuestions(data.questions);
-      } else {
-        alert("Failed to generate quiz. Check if backend is running!");
-      }
-    } catch (e) {
-      console.error(e);
-      alert("Failed to load quiz! Make sure backend is running on http://localhost:5001");
+const loadQuiz = async () => {
+  setLoading(true);
+  setFinished(false);
+  setResult(null);
+  setAnswers({});
+  setCurrent(0);
+  try {
+    console.log('🔍 Fetching from:', `http://localhost:5001/api/quiz/generate`);
+    console.log('🔍 Topic ID:', topicId);
+    
+    const res = await fetch("http://localhost:5001/api/quiz/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ topicId, userId })
+    });
+    
+    console.log('🔍 Response status:', res.status);
+    const data = await res.json();
+    console.log('🔍 Response data:', data);
+    
+    if (data.questions) {
+      console.log('✅ Questions received:', data.questions.length);
+      setQuestions(data.questions);
+    } else {
+      console.log('❌ No questions in response');
+      alert("Failed to generate quiz. Check console for details!");
     }
-    setLoading(false);
-  };
+  } catch (e) {
+    console.error('❌ Fetch error:', e);
+    alert("Failed to load quiz! Error: " + e.message);
+  }
+  setLoading(false);
+};
+
 
   const handleOptionSelect = (questionId, optionIndex) => {
     setAnswers((prev) => ({ ...prev, [questionId]: optionIndex }));
