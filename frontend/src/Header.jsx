@@ -13,6 +13,15 @@ const Header = () => {
 
   const navigate = useNavigate();
 
+  const handleLearnClick = () => {
+    const lastTopic = localStorage.getItem("lastOpenedTopic");
+    if (lastTopic) {
+      navigate(`/topic/${lastTopic}`);
+    } else {
+      navigate("/topics");
+    }
+  };
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) setUser(JSON.parse(storedUser));
@@ -45,7 +54,7 @@ const Header = () => {
   const navItems = [
     { label: "Home", href: "/" },
     { label: "Dashboard", href: "/dashboard" },
-    { label: "Learn", href: "/topics" },
+    { label: "Learn", href: null, onClick: handleLearnClick },
   ];
 
   return (
@@ -79,19 +88,37 @@ const Header = () => {
         <nav className="hidden md:flex space-x-8 lg:space-x-12 text-gray-300 font-medium items-center">
           {navItems.map((item) => (
             <motion.div key={item.label}>
-              <Link
-                to={item.href}
-                className="relative group py-2"
-                onClick={() => setMenuOpen(false)}
-              >
-                <motion.span
-                  className="relative z-10 transition-colors duration-300 group-hover:text-cyan-300 group-hover:drop-shadow-[0_0_8px_rgba(103,232,249,0.8)]"
-                  whileHover={{ scale: 1.05 }}
+              {item.href ? (
+                <Link
+                  to={item.href}
+                  className="relative group py-2"
+                  onClick={() => setMenuOpen(false)}
                 >
-                  {item.label}
-                </motion.span>
-                <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-gradient-to-r from-cyan-500 to-purple-500 transition-all duration-300 group-hover:w-full shadow-[0_0_10px_rgba(168,85,247,0.6)]"></span>
-              </Link>
+                  <motion.span
+                    className="relative z-10 transition-colors duration-300 group-hover:text-cyan-300 group-hover:drop-shadow-[0_0_8px_rgba(103,232,249,0.8)]"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    {item.label}
+                  </motion.span>
+                  <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-gradient-to-r from-cyan-500 to-purple-500 transition-all duration-300 group-hover:w-full shadow-[0_0_10px_rgba(168,85,247,0.6)]"></span>
+                </Link>
+              ) : (
+                <button
+                  onClick={() => {
+                    item.onClick();
+                    setMenuOpen(false);
+                  }}
+                  className="relative group py-2"
+                >
+                  <motion.span
+                    className="relative z-10 transition-colors duration-300 group-hover:text-cyan-300 group-hover:drop-shadow-[0_0_8px_rgba(103,232,249,0.8)]"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    {item.label}
+                  </motion.span>
+                  <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-gradient-to-r from-cyan-500 to-purple-500 transition-all duration-300 group-hover:w-full shadow-[0_0_10px_rgba(168,85,247,0.6)]"></span>
+                </button>
+              )}
             </motion.div>
           ))}
 
@@ -155,13 +182,25 @@ const Header = () => {
             <nav className="flex flex-col items-center space-y-8 py-10">
               {navItems.map((item) => (
                 <motion.div key={item.label} variants={menuItemVariants}>
-                  <Link
-                    to={item.href}
-                    onClick={() => setMenuOpen(false)}
-                    className="text-2xl text-gray-300 font-medium tracking-wider hover:text-cyan-400"
-                  >
-                    {item.label}
-                  </Link>
+                  {item.href ? (
+                    <Link
+                      to={item.href}
+                      onClick={() => setMenuOpen(false)}
+                      className="text-2xl text-gray-300 font-medium tracking-wider hover:text-cyan-400"
+                    >
+                      {item.label}
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        item.onClick();
+                        setMenuOpen(false);
+                      }}
+                      className="text-2xl text-gray-300 font-medium tracking-wider hover:text-cyan-400"
+                    >
+                      {item.label}
+                    </button>
+                  )}
                 </motion.div>
               ))}
 
