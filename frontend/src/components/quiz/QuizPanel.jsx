@@ -16,33 +16,32 @@ function QuizPanel({ topicId = "network-attacks", userId = "anonymous" }) {
     setCurrent(0);
 
     try {
-      console.log('🔍 Fetching from:', `http://localhost:5001/api/quiz/generate`);
-      console.log('🔍 Topic ID:', topicId);
-      
+      console.log("🔍 Fetching quiz for topic:", topicId);
+
       const res = await fetch("http://localhost:5001/api/quiz/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topicId, userId })
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // ✅ REQUIRED
+        },
+        body: JSON.stringify({ topicId }), // ✅ VALID PAYLOAD
       });
-      
-      console.log('🔍 Response status:', res.status);
+
+      console.log("🔍 Response status:", res.status);
       const data = await res.json();
-      console.log('🔍 Response data:', data);
-      
+      console.log("🔍 Response data:", data);
+
       if (!res.ok) {
-        console.error("❌ Quiz generate error:", data?.error);
-        alert(data?.error || "Failed to generate quiz. Check console for details!");
+        alert(data?.error || "Failed to generate quiz!");
         setQuestions([]);
       } else if (data.questions && data.questions.length > 0) {
-        console.log('✅ Questions received:', data.questions.length);
         setQuestions(data.questions);
       } else {
-        console.log('❌ No questions in response');
         alert("No questions returned for this topic.");
       }
     } catch (e) {
-      console.error('❌ Fetch error:', e);
-      alert("Failed to load quiz! Error: " + e.message);
+      console.error("❌ Fetch error:", e);
+      alert("Failed to load quiz!");
     }
 
     setLoading(false);
@@ -58,7 +57,8 @@ function QuizPanel({ topicId = "network-attacks", userId = "anonymous" }) {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
 
-  const handleNext = () => current < questions.length - 1 && setCurrent((c) => c + 1);
+  const handleNext = () =>
+    current < questions.length - 1 && setCurrent((c) => c + 1);
   const handlePrev = () => current > 0 && setCurrent((c) => c - 1);
 
   const handleSubmit = async () => {
@@ -66,39 +66,45 @@ function QuizPanel({ topicId = "network-attacks", userId = "anonymous" }) {
     setLoading(true);
 
     try {
-      // IMPORTANT: send all questions, with proper types
+      // ✅ CREATE PAYLOAD PROPERLY
       const payload = {
         topicId,
-        userId,
         answers: questions.map((q) => ({
           questionId: q.id,
           selected:
             q.type === "mcq"
-              ? (typeof answers[q.id] === "number" ? answers[q.id] : -1) // -1 = not answered
-              : (typeof answers[q.id] === "string" ? answers[q.id] : "")  // "" = not answered
-        }))
+              ? typeof answers[q.id] === "number"
+                ? answers[q.id]
+                : -1
+              : typeof answers[q.id] === "string"
+              ? answers[q.id]
+              : "",
+        })),
       };
 
       console.log("📤 Submitting quiz payload:", payload);
 
       const res = await fetch("http://localhost:5001/api/quiz/submit", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // ✅ REQUIRED
+        },
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
       console.log("📥 Submit response:", data);
 
       if (!res.ok) {
-        console.error("❌ Quiz submit error:", data?.error);
-        alert(data?.error || "Failed to submit quiz!");
+        console.error("❌ Quiz submit error:", data);
+        alert(data?.message || "Failed to submit quiz!");
       } else {
         setResult(data);
         setFinished(true);
       }
     } catch (e) {
-      console.error(e);
+      console.error("❌ Submit catch error:", e);
       alert("Failed to submit quiz!");
     }
 
@@ -106,14 +112,17 @@ function QuizPanel({ topicId = "network-attacks", userId = "anonymous" }) {
   };
 
   if (loading && questions.length === 0) {
-    return <p className="text-center text-gray-300 text-lg">Generating your quiz...</p>;
+    return (
+      <p className="text-center text-gray-300 text-lg">
+        Generating your quiz...
+      </p>
+    );
   }
 
   const currentQuestion = questions[current];
 
   return (
     <div className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-sm text-gray-100 max-w-3xl mx-auto">
-      
       {questions.length === 0 && !finished && (
         <div className="text-center">
           <p className="text-gray-300 mb-6">
@@ -132,13 +141,19 @@ function QuizPanel({ topicId = "network-attacks", userId = "anonymous" }) {
         <>
           <div className="mb-8">
             <div className="flex justify-between text-sm text-gray-400 mb-2">
-              <span>Question {current + 1} of {questions.length}</span>
-              <span>{Math.round(((current + 1) / questions.length) * 100)}%</span>
+              <span>
+                Question {current + 1} of {questions.length}
+              </span>
+              <span>
+                {Math.round(((current + 1) / questions.length) * 100)}%
+              </span>
             </div>
             <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
               <div
                 className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-500"
-                style={{ width: `${((current + 1) / questions.length) * 100}%` }}
+                style={{
+                  width: `${((current + 1) / questions.length) * 100}%`,
+                }}
               />
             </div>
           </div>
@@ -155,10 +170,13 @@ function QuizPanel({ topicId = "network-attacks", userId = "anonymous" }) {
                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/20 text-gray-100 focus:outline-none focus:border-cyan-400"
                 placeholder="Type your answer here..."
                 value={answers[currentQuestion.id] || ""}
-                onChange={(e) => handleFillChange(currentQuestion.id, e.target.value)}
+                onChange={(e) =>
+                  handleFillChange(currentQuestion.id, e.target.value)
+                }
               />
               <p className="mt-2 text-sm text-gray-400">
-                The blank in the sentence is shown as "______" in the question text.
+                The blank in the sentence is shown as "______" in the question
+                text.
               </p>
             </div>
           ) : (
@@ -215,7 +233,6 @@ function QuizPanel({ topicId = "network-attacks", userId = "anonymous" }) {
 
       {finished && result && (
         <div className="text-center space-y-8">
-          
           <div>
             <p className="text-6xl font-bold text-transparent bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text mb-2">
               {result.score}/{result.total}
@@ -226,18 +243,32 @@ function QuizPanel({ topicId = "network-attacks", userId = "anonymous" }) {
           </div>
 
           <div className="text-lg text-gray-300">
-            {result.score === result.total && <p>🎉 Perfect Score! Amazing work!</p>}
-            {result.score >= result.total * 0.8 && result.score < result.total && <p>✨ Great job! You're doing well.</p>}
-            {result.score >= result.total * 0.6 && result.score < result.total * 0.8 && <p>👍 Good effort! Keep practicing.</p>}
-            {result.score < result.total * 0.6 && <p>💪 Keep learning! You'll improve.</p>}
+            {result.score === result.total && (
+              <p>🎉 Perfect Score! Amazing work!</p>
+            )}
+            {result.score >= result.total * 0.8 &&
+              result.score < result.total && (
+                <p>✨ Great job! You're doing well.</p>
+              )}
+            {result.score >= result.total * 0.6 &&
+              result.score < result.total * 0.8 && (
+                <p>👍 Good effort! Keep practicing.</p>
+              )}
+            {result.score < result.total * 0.6 && (
+              <p>💪 Keep learning! You'll improve.</p>
+            )}
           </div>
 
           {result.weakAreas?.length > 0 && (
             <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6">
-              <p className="font-bold text-red-300 mb-3">📌 Topics to Review:</p>
+              <p className="font-bold text-red-300 mb-3">
+                📌 Topics to Review:
+              </p>
               <ul className="space-y-2 text-left">
                 {result.weakAreas.map((area) => (
-                  <li key={area} className="text-red-200">• {area}</li>
+                  <li key={area} className="text-red-200">
+                    • {area}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -248,7 +279,9 @@ function QuizPanel({ topicId = "network-attacks", userId = "anonymous" }) {
               <p className="font-bold text-blue-300 mb-3">💡 Suggestions:</p>
               <ul className="space-y-2 text-left">
                 {result.suggestions.map((suggestion, i) => (
-                  <li key={i} className="text-blue-200">• {suggestion}</li>
+                  <li key={i} className="text-blue-200">
+                    • {suggestion}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -262,7 +295,6 @@ function QuizPanel({ topicId = "network-attacks", userId = "anonymous" }) {
           </button>
         </div>
       )}
-
     </div>
   );
 }
