@@ -3,6 +3,7 @@ require("./cron/dailyNews");
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const chatbotRoutes = require("./routes/chatbot.routes");
 
 const app = express();
 
@@ -22,6 +23,7 @@ const dashboardRoutes = require("./routes/dashboard.routes");
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/quiz", require("./routes/quiz.routes"));
 app.use("/api/newsletter", require("./routes/newsletter.routes"));
+app.use("/api/chatbot", chatbotRoutes);
 
 
 const Topic = require('./models/topic.model');
