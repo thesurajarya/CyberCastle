@@ -1,4 +1,5 @@
 require('dotenv').config();
+require("./cron/dailyNews");
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -20,6 +21,8 @@ app.use('/api/users', require('./routes/users.routes'));
 const dashboardRoutes = require("./routes/dashboard.routes");
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/quiz", require("./routes/quiz.routes"));
+app.use("/api/newsletter", require("./routes/newsletter.routes"));
+
 
 // === AI QUIZ SYSTEM START ===
 const Topic = require('./models/topic.model');
