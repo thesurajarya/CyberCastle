@@ -130,14 +130,13 @@ function TopicPage() {
                         <span className="truncate">{sub.title}</span>
                       </div>
                     </button>
-                  );
-                })}
-              </div>
+                );
+              })}
             </div>
           </div>
-        )}
+        </div>
 
-          {/* Main Content */}
+        {/* Main Content */}
           <div className="lg:col-span-3 space-y-8">
             
             {/* Overview Section */}
