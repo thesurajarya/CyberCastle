@@ -7,6 +7,8 @@ function QuizPanel({ topicId = "network-attacks", userId = "anonymous" }) {
   const [loading, setLoading] = useState(false);
   const [finished, setFinished] = useState(false);
   const [result, setResult] = useState(null);
+  const [answered, setAnswered] = useState(false);
+  const [correctAnswers, setCorrectAnswers] = useState({});
 
   const loadQuiz = async () => {
     setLoading(true);
@@ -14,6 +16,8 @@ function QuizPanel({ topicId = "network-attacks", userId = "anonymous" }) {
     setResult(null);
     setAnswers({});
     setCurrent(0);
+    setAnswered(false);
+    setCorrectAnswers({});
 
     try {
       console.log("🔍 Fetching quiz for topic:", topicId);
@@ -49,7 +53,16 @@ function QuizPanel({ topicId = "network-attacks", userId = "anonymous" }) {
 
   // For MCQ, optionIndex is a number
   const handleOptionSelect = (questionId, optionIndex) => {
+    if (answered) return; // Prevent changing answer after submission
     setAnswers((prev) => ({ ...prev, [questionId]: optionIndex }));
+    
+    // Find the current question and check if answer is correct
+    const question = questions.find(q => q.id === questionId);
+    if (question) {
+      const isCorrect = optionIndex === question.correctIndex;
+      setCorrectAnswers((prev) => ({ ...prev, [questionId]: isCorrect }));
+      setAnswered(true);
+    }
   };
 
   // For FILL, store string
@@ -57,8 +70,29 @@ function QuizPanel({ topicId = "network-attacks", userId = "anonymous" }) {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
 
-  const handleNext = () =>
-    current < questions.length - 1 && setCurrent((c) => c + 1);
+  const handleFillSubmit = (questionId) => {
+    if (answered) return;
+    
+    const question = questions.find(q => q.id === questionId);
+    if (question) {
+      const userAnswer = (answers[questionId] || "").trim().toLowerCase();
+      // Handle both single answer string and array of acceptable answers
+      const expectedArray = Array.isArray(question.answer)
+        ? question.answer.map(a => String(a).trim().toLowerCase())
+        : [String(question.answer).trim().toLowerCase()];
+      const isCorrect = expectedArray.includes(userAnswer);
+      
+      setCorrectAnswers((prev) => ({ ...prev, [questionId]: isCorrect }));
+      setAnswered(true);
+    }
+  };
+
+  const handleNext = () => {
+    if (current < questions.length - 1) {
+      setCurrent((c) => c + 1);
+      setAnswered(false);
+    }
+  };
   const handlePrev = () => current > 0 && setCurrent((c) => c - 1);
 
   const handleSubmit = async () => {
@@ -165,34 +199,79 @@ function QuizPanel({ topicId = "network-attacks", userId = "anonymous" }) {
           {/* MCQ vs Fill-in-the-blank */}
           {currentQuestion.type === "fill" ? (
             <div className="mb-10">
-              <input
-                type="text"
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/20 text-gray-100 focus:outline-none focus:border-cyan-400"
-                placeholder="Type your answer here..."
-                value={answers[currentQuestion.id] || ""}
-                onChange={(e) =>
-                  handleFillChange(currentQuestion.id, e.target.value)
-                }
-              />
-              <p className="mt-2 text-sm text-gray-400">
-                The blank in the sentence is shown as "______" in the question
-                text.
-              </p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  className={`flex-1 px-4 py-3 rounded-xl bg-white/5 border-2 text-gray-100 focus:outline-none transition-all ${
+                    answered
+                      ? correctAnswers[currentQuestion.id]
+                        ? "border-green-500 bg-green-500/5"
+                        : "border-red-500 bg-red-500/5"
+                      : "border-white/20 focus:border-cyan-400"
+                  }`}
+                  placeholder="Type your answer here..."
+                  value={answers[currentQuestion.id] || ""}
+                  onChange={(e) =>
+                    handleFillChange(currentQuestion.id, e.target.value)
+                  }
+                  disabled={answered}
+                />
+                {!answered && (
+                  <button
+                    type="button"
+                    onClick={() => handleFillSubmit(currentQuestion.id)}
+                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-xl font-medium transition-all whitespace-nowrap"
+                  >
+                    Check
+                  </button>
+                )}
+              </div>
+              {answered && (
+                <p className={`mt-2 text-sm font-medium ${
+                  correctAnswers[currentQuestion.id]
+                    ? "text-green-400"
+                    : "text-red-400"
+                }`}>
+                  {correctAnswers[currentQuestion.id]
+                    ? "Correct!"
+                    : `Incorrect. Correct answer: ${Array.isArray(currentQuestion.answer) ? currentQuestion.answer.join(' / ') : currentQuestion.answer}`}
+                </p>
+              )}
+              {!answered && (
+                <p className="mt-2 text-sm text-gray-400">
+                  The blank in the sentence is shown as "______" in the question
+                  text.
+                </p>
+              )}
             </div>
           ) : (
             <ul className="space-y-4 mb-10">
               {currentQuestion.options?.map((opt, idx) => {
                 const qid = currentQuestion.id;
                 const selected = answers[qid] === idx;
+                const isCorrectOption = idx === currentQuestion.correctIndex;
+                
+                let optionClasses = "px-6 py-4 rounded-xl border-2 cursor-pointer transition-all font-medium ";
+                
+                if (!answered) {
+                  optionClasses += selected
+                    ? "bg-blue-600/80 border-blue-400 shadow-lg shadow-blue-500/30"
+                    : "bg-white/5 hover:bg-white/10 border-white/20 hover:shadow-md hover:cursor-pointer";
+                } else {
+                  if (isCorrectOption) {
+                    optionClasses += "bg-green-500/15 border-green-500 shadow-lg shadow-green-500/15";
+                  } else if (selected && !isCorrectOption) {
+                    optionClasses += "bg-red-500/15 border-red-500 shadow-lg shadow-red-500/15";
+                  } else {
+                    optionClasses += "bg-white/5 border-white/20 opacity-60";
+                  }
+                }
+                
                 return (
                   <li
                     key={idx}
-                    onClick={() => handleOptionSelect(qid, idx)}
-                    className={`px-6 py-4 rounded-xl border-2 cursor-pointer transition-all font-medium ${
-                      selected
-                        ? "bg-blue-600/80 border-blue-400 shadow-lg shadow-blue-500/30"
-                        : "bg-white/5 hover:bg-white/10 border-white/20 hover:shadow-md"
-                    }`}
+                    onClick={() => !answered && handleOptionSelect(qid, idx)}
+                    className={optionClasses}
                   >
                     {opt}
                   </li>
@@ -215,14 +294,16 @@ function QuizPanel({ topicId = "network-attacks", userId = "anonymous" }) {
             {current < questions.length - 1 ? (
               <button
                 onClick={handleNext}
-                className="px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 font-medium shadow-lg transition-all"
+                disabled={!answered}
+                className="px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-40 font-medium shadow-lg transition-all"
               >
                 Next →
               </button>
             ) : (
               <button
                 onClick={handleSubmit}
-                className="px-8 py-3 rounded-lg bg-green-600 hover:bg-green-700 font-bold shadow-lg transition-all text-white"
+                disabled={!answered}
+                className="px-8 py-3 rounded-lg bg-green-600 hover:bg-green-700 disabled:opacity-40 font-bold shadow-lg transition-all text-white"
               >
                 ✓ Submit Quiz
               </button>
