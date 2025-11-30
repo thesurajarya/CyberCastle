@@ -24,6 +24,16 @@ function TopicPage() {
       });
   }, [topicId]);
 
+  // Store last opened chapter in localStorage
+  useEffect(() => {
+    if (topicId) {
+      localStorage.setItem("lastOpenedTopic", topicId);
+      if (selectedSubtopic) {
+        localStorage.setItem("lastOpenedSubtopic", JSON.stringify(selectedSubtopic));
+      }
+    }
+  }, [topicId, selectedSubtopic]);
+
   // Load per-topic progress (for subtopic dots)
   useEffect(() => {
     fetch(`http://localhost:5001/api/progress/anonymous/${topicId}`)
