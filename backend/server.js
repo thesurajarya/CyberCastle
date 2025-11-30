@@ -17,6 +17,9 @@ mongoose.connect(process.env.MONGODB_URI)
 // Routes
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/users', require('./routes/users.routes'));
+const dashboardRoutes = require("./routes/dashboard.routes");
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/quiz", require("./routes/quiz.routes"));
 
 // === AI QUIZ SYSTEM START ===
 const Topic = require('./models/topic.model');
