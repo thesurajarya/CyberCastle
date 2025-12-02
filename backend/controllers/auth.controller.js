@@ -5,14 +5,21 @@ exports.register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    // Validate input
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: 'Username, email, and password are required' });
+    }
+
+    // Check if user already exists (lowercase email for comparison)
+    const existingUser = await User.findOne({ 
+      $or: [{ email: email.toLowerCase() }, { username }] 
+    });
     if (existingUser) {
       return res.status(400).json({ message: 'Username or email already exists' });
     }
 
-    // Create new user
-    const user = new User({ username, email, password });
+    // Create new user (email will be lowercased by schema)
+    const user = new User({ username, email: email.toLowerCase(), password });
     await user.save();
 
     // Generate JWT token
