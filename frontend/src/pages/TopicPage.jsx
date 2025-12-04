@@ -42,14 +42,22 @@ function TopicPage() {
       .catch(() => setProgress(null));
   }, [topicId]);
 
-  const getSubtopicStatus = (subId) => {
-    const s = progress?.subtopicStats?.[subId];
-    if (!s || s.seen === 0) return "neutral";
-    const accuracy = 1 - s.wrong / s.seen;
-    if (accuracy >= 0.8) return "good";
-    if (accuracy >= 0.5) return "medium";
-    return "bad";
-  };
+const getSubtopicStatus = (sub) => {
+  if (!progress || !progress.subtopicStats) return "neutral";
+
+  const key = sub.id || sub.title;
+  const s =
+    progress.subtopicStats[key] ||
+    progress.subtopicStats[sub.title] ||
+    null;
+
+  if (!s || s.seen === 0) return "neutral";
+  const accuracy = 1 - s.wrong / s.seen;
+  if (accuracy >= 0.8) return "good";
+  if (accuracy >= 0.5) return "medium";
+  return "bad";
+};
+
 
   if (loading) {
     return (
@@ -115,7 +123,7 @@ function TopicPage() {
               <h3 className="text-lg font-bold text-white mb-4">Chapters</h3>
               <div className="space-y-2">
                 {topicContent.subtopics?.map((sub) => {
-                  const status = getSubtopicStatus(sub.id);
+                const status = getSubtopicStatus(sub);
                   const dotColor =
                     status === "good"
                       ? "bg-emerald-400"
@@ -164,9 +172,42 @@ function TopicPage() {
             {selectedSubtopic && (
               <div className="space-y-6">
                 <div className="bg-gradient-to-br from-white/10 to-white/5 border border-white/10 rounded-3xl p-8 md:p-12">
-                  <h2 className="text-4xl font-bold text-cyan-300 mb-2">{selectedSubtopic.title}</h2>
-                  <div className="h-1 w-20 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full mb-8"></div>
-                  
+                  <div className="flex items-center gap-3 mb-2">
+                    <h2 className="text-4xl font-bold text-cyan-300">
+                      {selectedSubtopic.title}
+                    </h2>
+
+                    {(() => {
+                      const status = getSubtopicStatus(selectedSubtopic);
+                      if (status === "neutral") return null;
+
+                      const label =
+                        status === "good"
+                          ? "Strong area"
+                          : status === "medium"
+                          ? "Moderate"
+                          : "Needs practice";
+
+                      const colorClass =
+                        status === "good"
+                          ? "bg-emerald-500/15 border-emerald-400/60 text-emerald-200"
+                          : status === "medium"
+                          ? "bg-amber-500/15 border-amber-400/60 text-amber-100"
+                          : "bg-red-500/15 border-red-400/70 text-red-100";
+
+                      return (
+                        <span
+                          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${colorClass}`}
+                        >
+                          <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                          {label}
+                        </span>
+                      );
+                    })()}
+                  </div>
+
+                  <div className="h-1 w-20 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full mb-8" />
+
                   <div
                     dangerouslySetInnerHTML={{ __html: selectedSubtopic.content }}
                     className="prose prose-invert max-w-none text-gray-200 space-y-4 leading-relaxed"
@@ -174,6 +215,7 @@ function TopicPage() {
                 </div>
               </div>
             )}
+
 
             {/* Real World Analogy */}
             {topicContent.realWorldAnalogy && (
