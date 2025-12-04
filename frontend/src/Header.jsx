@@ -55,7 +55,22 @@ const Header = () => {
     { label: "Home", href: "/" },
     { label: "Dashboard", href: "/dashboard" },
     { label: "Learn", href: null, onClick: handleLearnClick },
+    { label: "Flashcards", href: "#revision-flashcards" },
   ];
+
+  const scrollToSection = (hash) => {
+    const doScroll = () => {
+      const el = document.querySelector(hash);
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    };
+
+    if (window.location.pathname !== "/") {
+      navigate("/");
+      setTimeout(doScroll, 300);
+    } else {
+      doScroll();
+    }
+  };
 
   return (
     <motion.header
@@ -69,7 +84,6 @@ const Header = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 py-3 md:py-4 flex items-center justify-between">
-        
         {/* LOGO */}
         <motion.div
           className="relative z-10 cursor-pointer"
@@ -89,19 +103,37 @@ const Header = () => {
           {navItems.map((item) => (
             <motion.div key={item.label}>
               {item.href ? (
-                <Link
-                  to={item.href}
-                  className="relative group py-2"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  <motion.span
-                    className="relative z-10 transition-colors duration-300 group-hover:text-cyan-300 group-hover:drop-shadow-[0_0_8px_rgba(103,232,249,0.8)]"
-                    whileHover={{ scale: 1.05 }}
+                item.href.startsWith("#") ? (
+                  <button
+                    onClick={() => {
+                      scrollToSection(item.href);
+                      setMenuOpen(false);
+                    }}
+                    className="relative group py-2"
                   >
-                    {item.label}
-                  </motion.span>
-                  <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-gradient-to-r from-cyan-500 to-purple-500 transition-all duration-300 group-hover:w-full shadow-[0_0_10px_rgba(168,85,247,0.6)]"></span>
-                </Link>
+                    <motion.span
+                      className="relative z-10 transition-colors duration-300 group-hover:text-cyan-300 group-hover:drop-shadow-[0_0_8px_rgba(103,232,249,0.8)]"
+                      whileHover={{ scale: 1.05 }}
+                    >
+                      {item.label}
+                    </motion.span>
+                    <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-gradient-to-r from-cyan-500 to-purple-500 transition-all duration-300 group-hover:w-full shadow-[0_0_10px_rgba(168,85,247,0.6)]" />
+                  </button>
+                ) : (
+                  <Link
+                    to={item.href}
+                    className="relative group py-2"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <motion.span
+                      className="relative z-10 transition-colors duration-300 group-hover:text-cyan-300 group-hover:drop-shadow-[0_0_8px_rgba(103,232,249,0.8)]"
+                      whileHover={{ scale: 1.05 }}
+                    >
+                      {item.label}
+                    </motion.span>
+                    <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-gradient-to-r from-cyan-500 to-purple-500 transition-all duration-300 group-hover:w-full shadow-[0_0_10px_rgba(168,85,247,0.6)]" />
+                  </Link>
+                )
               ) : (
                 <button
                   onClick={() => {
@@ -116,7 +148,7 @@ const Header = () => {
                   >
                     {item.label}
                   </motion.span>
-                  <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-gradient-to-r from-cyan-500 to-purple-500 transition-all duration-300 group-hover:w-full shadow-[0_0_10px_rgba(168,85,247,0.6)]"></span>
+                  <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-gradient-to-r from-cyan-500 to-purple-500 transition-all duration-300 group-hover:w-full shadow-[0_0_10px_rgba(168,85,247,0.6)]" />
                 </button>
               )}
             </motion.div>
@@ -183,13 +215,25 @@ const Header = () => {
               {navItems.map((item) => (
                 <motion.div key={item.label} variants={menuItemVariants}>
                   {item.href ? (
-                    <Link
-                      to={item.href}
-                      onClick={() => setMenuOpen(false)}
-                      className="text-2xl text-gray-300 font-medium tracking-wider hover:text-cyan-400"
-                    >
-                      {item.label}
-                    </Link>
+                    item.href.startsWith("#") ? (
+                      <button
+                        onClick={() => {
+                          scrollToSection(item.href);
+                          setMenuOpen(false);
+                        }}
+                        className="text-2xl text-gray-300 font-medium tracking-wider hover:text-cyan-400"
+                      >
+                        {item.label}
+                      </button>
+                    ) : (
+                      <Link
+                        to={item.href}
+                        onClick={() => setMenuOpen(false)}
+                        className="text-2xl text-gray-300 font-medium tracking-wider hover:text-cyan-400"
+                      >
+                        {item.label}
+                      </Link>
+                    )
                   ) : (
                     <button
                       onClick={() => {
@@ -226,8 +270,6 @@ const Header = () => {
                   >
                     Login
                   </motion.button>
-
-                  {/* Get Started removed — Login remains accessible above */}
                 </>
               )}
             </nav>
@@ -238,7 +280,11 @@ const Header = () => {
       {/* LOGIN MODAL */}
       <AnimatePresence>
         {showLogin && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
             <LoginForm
               onClose={() => setShowLogin(false)}
               onLoginSuccess={(userData) => setUser(userData)}

@@ -1,24 +1,29 @@
-import React, { useState, useEffect } from "react";
-import Flashcard from "./Flashcard";
+import React, { useState } from "react";
+import Flashcard from "./Flashcard.jsx";
 
 function FlashcardDeck({ cards }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
 
+  if (!cards || cards.length === 0) {
+    return (
+      <div className="max-w-md mx-auto p-6 bg-white/10 backdrop-blur-lg rounded-3xl shadow-xl border border-white/20 text-center text-gray-300">
+        No flashcards available for the selected topics.
+      </div>
+    );
+  }
+
   const currentCard = cards[currentIndex];
   const progress = ((currentIndex + 1) / cards.length) * 100;
 
-  // reset flip whenever card changes
-  useEffect(() => {
-    setFlipped(false);
-  }, [currentIndex, cards]);
-
   const goPrev = () => {
     setCurrentIndex((prev) => (prev === 0 ? cards.length - 1 : prev - 1));
+    setFlipped(false);
   };
 
   const goNext = () => {
     setCurrentIndex((prev) => (prev === cards.length - 1 ? 0 : prev + 1));
+    setFlipped(false);
   };
 
   return (
